@@ -1,0 +1,55 @@
+#!/usr/bin/env php
+<?php
+
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
+
+define('DS', DIRECTORY_SEPARATOR);
+
+$root = (extension_loaded('phar') && ($uri  = Phar::running())) ? $uri : dirname(__DIR__);
+require $root . '/vendor/autoload.php';
+
+
+$console = new Application();
+$console->setName('ISPConfig CLI');
+$console->setVersion('0.0.1');
+$console->addCommands(\GDM\Helpers\ISPConfig::getInstance()->getCommands());
+
+$consoleCommandsDirectory = dirname(__DIR__) . DS . 'src' . DS . 'GDM' . DS . 'ISPConfigCli' . DS . 'Commands' . DS;
+
+clearstatcache(true, $consoleCommandsDirectory);
+
+$finder = new Finder();
+$paths  = $finder->files()
+        ->name('*Command.php')
+        ->notName('*AbstractCommand.php')
+        // ignore all interfaces
+        ->notName('*Interface.php')
+        ->depth('== 0')
+        ->in($consoleCommandsDirectory)
+        ->getIterator();
+
+
+// create console commands
+foreach ($paths as $path) {
+    $className = 'GDM\\ISPConfigCli\\Commands\\' . basename($path, '.php');
+
+    $reflection = new \ReflectionClass($className);
+
+    // do not create abstract classes and interfaces
+    if ($reflection->isAbstract() || $reflection->isInterface()) {
+        continue;
+    }
+
+    $command = new $className;
+    /* @var $command \Symfony\Component\Console\Command\Command */
+
+    if (!$command instanceof Command) {
+        continue;
+    }
+    $console->add($command);
+}
+
+
+$console->run();

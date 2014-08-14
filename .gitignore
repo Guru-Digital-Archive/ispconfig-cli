@@ -1,0 +1,8 @@
+composer.lock
+nbproject/
+boilerplate.phar
+.DS_Store
+old/
+ispconfig-cli.yml
+test.php
+vendor

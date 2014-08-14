@@ -1,0 +1,62 @@
+## Rename this file to ispconfig-cli.yml
+## Config for ISP Config Command Line Interface
+---
+url: https://localhost:8080/remote/index.php
+user: admin
+password: mysupersecretpassword
+# Defaults for the CreateSiteCommand
+CreateSiteCommand:
+    # If your server names all have the save suffix, you can add it there, server names can then be referenced by thier subdomain
+    # eg. If you server names are server1.example.com, server2.example.com, server3.example.com, setting suffix to .example.com
+    #     allows you to refernce servers by server1,server2 etc
+    suffix:
+    # Defaults for each server based on Server ID
+    servers:
+        # Defaults for server with ID 1
+        1:
+            sitesWebDomainAdd:
+                ipAddress: "*"
+                subdomain: www
+                hd_quota: -1
+                traffic_quota: -1
+                allow_override: All
+                pm_max_children: 10
+                pm_start_servers: 2
+                pm_min_spare_servers: 1
+                pm_max_spare_servers: 5
+                pm_process_idle_timeout: 10
+                pm_max_requests: 0
+                errordocs: 1
+                php: php-fpm
+                stats_type: webalizer
+                pm: dynamic
+                active: y
+                suexec: y
+                vhost_type: name
+                type: vhost
+                fastcgi_php_version: PHP 5.4.30:/etc/init.d/php-5.4.30-fpm:/opt/phpfarm/inst/php-5.4.30/lib/:/opt/phpfarm/inst/php-5.4.30/etc/pool.d/
+                readonly: 0
+        # Defaults for server with ID 3
+        3:
+            sitesWebDomainAdd:
+                ipAddress: "*"
+                subdomain: www
+                hd_quota: -1
+                traffic_quota: -1
+                allow_override: All
+                pm_max_children: 10
+                pm_start_servers: 2
+                pm_min_spare_servers: 1
+                pm_max_spare_servers: 5
+                pm_process_idle_timeout: 10
+                pm_max_requests: 0
+                errordocs: 1
+                php: fast-cgi
+                stats_type: webalizer
+                pm: dynamic
+                active: y
+                suexec: y
+                vhost_type: name
+                type: vhost
+                fastcgi_php_version:
+                readonly: 0

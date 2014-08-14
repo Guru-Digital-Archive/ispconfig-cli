@@ -1,0 +1,12 @@
+{
+    "finder": [
+        {
+            "name": "*.php",
+            "in": ["src", "vendor"]
+        }
+
+    ],
+    "main": "bin/ispconfig-cli",
+    "output": "ispconfig-cli.phar",
+    "stub": true
+}
