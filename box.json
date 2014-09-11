@@ -2,7 +2,8 @@
     "finder": [
         {
             "name": "*.php",
-            "in": ["src", "vendor"]
+            "in": ["src", "vendor"],
+            "exclude": ["old"]
         }
 
     ],

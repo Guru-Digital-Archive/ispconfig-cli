@@ -39,8 +39,7 @@ class ISPConfig {
     private $soapClient = null;
 
     protected function __construct() {
-        $config           = $this->getConfig();
-        $this->soapClient = new SoapClient($config['url'], $config['user'], $config['password']);
+
     }
 
     /**
@@ -48,6 +47,10 @@ class ISPConfig {
      * @return SoapClient
      */
     public function getSoapClient() {
+        if (!$this->soapClient) {
+            $config           = $this->getConfig();
+            $this->soapClient = new SoapClient($config['url'], $config['user'], $config['password']);
+        }
         return $this->soapClient;
     }
 
@@ -66,15 +69,17 @@ class ISPConfig {
         $etcConf    = DIRECTORY_SEPARATOR . 'etc' . DIRECTORY_SEPARATOR . self::$configFile;
         $dir        = dirname(__FILE__);
         $configFile = $dir . DIRECTORY_SEPARATOR . self::$configFile;
-
+        $checked    = array();
+        $checked[] = $etcConf;
         if (file_exists($etcConf)) {
             $configFile = $etcConf;
         } else {
             $max = 10;
             $i   = 1;
             while (!file_exists($configFile)) {
+                $checked[] = $configFile;
                 if ($i >= $max) {
-                    throw new Exception("Unable to find config file " . self::$configFile);
+                    throw new Exception("Unable to find config file: ".PHP_EOL . implode(PHP_EOL, $checked));
                 }
                 $dir        = dirname($dir);
                 $configFile = $dir . DIRECTORY_SEPARATOR . self::$configFile;

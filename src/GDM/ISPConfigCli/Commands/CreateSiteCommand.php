@@ -26,8 +26,7 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
                 addArgument("dbname", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Database name to setup')->
                 addArgument("dbuser", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Database user to setup or if exists to assign to database')->
                 addArgument("dbpass", \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Database password to assign to user (Only required if DB User does not exist)')->
-                addOption(
-                        'genpass', 'g', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'If set, a random db password will be generated'
+                addOption("genpass", 'g', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'If set, a random db password will be generated'
         );
     }
 
@@ -68,7 +67,6 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
     }
 
     protected function getServerId() {
-
         $serverId = $this->config->server;
         $this->info("Checking server " . $serverId . " ", false);
         if (!is_numeric($serverId)) {
