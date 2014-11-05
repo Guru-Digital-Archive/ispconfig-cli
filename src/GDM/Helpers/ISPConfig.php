@@ -67,8 +67,9 @@ class ISPConfig {
 
     protected function getConfigFile() {
         $etcConf    = DIRECTORY_SEPARATOR . 'etc' . DIRECTORY_SEPARATOR . self::$configFile;
-        $dir        = dirname(__FILE__);
+        $dir        = ( class_exists('\Phar') && \Phar::running(false) ) ? dirname(\Phar::running(false)) : dirname(__FILE__);
         $configFile = $dir . DIRECTORY_SEPARATOR . self::$configFile;
+
         $checked    = array();
         $checked[] = $etcConf;
         if (file_exists($etcConf)) {
@@ -86,6 +87,7 @@ class ISPConfig {
                 $i ++;
             }
         }
+
         return $configFile;
     }
 
