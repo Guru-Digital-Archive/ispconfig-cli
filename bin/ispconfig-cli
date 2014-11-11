@@ -8,7 +8,11 @@ use Symfony\Component\Console\Command\Command;
 define('DS', DIRECTORY_SEPARATOR);
 
 $root = (extension_loaded('phar') && ($uri  = Phar::running())) ? $uri : dirname(__DIR__);
-require $root . '/vendor/autoload.php';
+$autoloader =  $root . '/vendor/autoload.php';
+if (is_file($root.'/../../autoload.php')){
+        $autoloader = $root.'/../../autoload.php';
+}
+require $autoloader;
 
 
 $console = new Application();
