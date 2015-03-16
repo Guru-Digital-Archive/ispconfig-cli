@@ -12,7 +12,7 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
      * @var CreateSiteCommandConifg
      */
     private $config;
-    private $specialChars = '@#$%^&*()-+?';
+    private $specialChars = '@$%^&*()-+?_';
 
     const COMMAND_NAME = 'createSite';
 
@@ -181,6 +181,12 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
         }
         $this->success("OK");
 
+        $this->info("Checking database username " . $config->dbuser . " ", false);
+        if (strlen($config->dbuser) > 16) {
+            throw new \InvalidArgumentException("The database user name must be 16 characters or less");
+        }
+        $this->success("OK");
+        
         if ($this->config->dbpass) {
             $this->info("Checking database password ", false);
             $errors = array();
