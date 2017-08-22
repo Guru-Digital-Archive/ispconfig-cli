@@ -1,13 +1,12 @@
 <?php
-
 namespace GDM\ISPConfigCli;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use \GDM\Helpers\ISPConfig;
 
-class Command extends \Symfony\Component\Console\Command\Command {
-
+class Command extends \Symfony\Component\Console\Command\Command
+{
     /**
      * @var InputInterface
      */
@@ -28,7 +27,8 @@ class Command extends \Symfony\Component\Console\Command\Command {
     /**
      * {@inheritDoc}
      */
-    public function run(InputInterface $input, OutputInterface $output) {
+    public function run(InputInterface $input, OutputInterface $output)
+    {
         $this->input  = $input;
         $this->output = $output;
 
@@ -39,14 +39,16 @@ class Command extends \Symfony\Component\Console\Command\Command {
     /**
      * @return InputInterface
      */
-    public function getInput() {
+    public function getInput()
+    {
         return $this->input;
     }
 
     /**
      * @return OutputInterface
      */
-    public function getOutput() {
+    public function getOutput()
+    {
         return $this->output;
     }
 
@@ -56,7 +58,8 @@ class Command extends \Symfony\Component\Console\Command\Command {
      * @param string $message
      * @return AbstractCommand
      */
-    public function error($message, $writeLine = true) {
+    public function error($message, $writeLine = true)
+    {
         if ($writeLine) {
             $this->getOutput()->getErrorOutput()->writeln($message);
         } else {
@@ -70,7 +73,8 @@ class Command extends \Symfony\Component\Console\Command\Command {
      * @param string $message
      * @return AbstractCommand
      */
-    public function success($message, $writeLine = true) {
+    public function success($message, $writeLine = true)
+    {
         return $this->output('<info>' . $message . '</info>', $writeLine);
     }
 
@@ -80,7 +84,8 @@ class Command extends \Symfony\Component\Console\Command\Command {
      * @param string $message
      * @return AbstractCommand
      */
-    public function info($message, $writeLine = true) {
+    public function info($message, $writeLine = true)
+    {
         return $this->output($message, $writeLine);
     }
 
@@ -90,7 +95,8 @@ class Command extends \Symfony\Component\Console\Command\Command {
      * @param string $message
      * @return AbstractCommand
      */
-    public function output($message, $writeLine = true) {
+    public function output($message, $writeLine = true)
+    {
         if ($writeLine) {
             $this->getOutput()->writeln($message);
         } else {
@@ -104,15 +110,18 @@ class Command extends \Symfony\Component\Console\Command\Command {
      *
      * @return \GDM\ISPConfig\SoapClient
      */
-    public function soapClient() {
+    public function soapClient()
+    {
         return ISPConfig::getInstance()->getSoapClient();
     }
 
-    public function printLastSoapClientError() {
+    public function printLastSoapClientError()
+    {
         return ISPConfig::getInstance();
     }
 
-    public function printLastError() {
+    public function printLastError()
+    {
         $lastEx = ISPConfig::getInstance()->getSoapClient()->getLastException();
         if ($lastEx) {
             if (OutputInterface::VERBOSITY_VERBOSE <= $this->getOutput()->getVerbosity()) {
@@ -126,7 +135,8 @@ class Command extends \Symfony\Component\Console\Command\Command {
         }
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $arguments = $input->getArguments();
         if (isset($arguments['command']) && $arguments['command'] == $this->getName()) {
             unset($arguments['command']);
@@ -156,16 +166,26 @@ class Command extends \Symfony\Component\Console\Command\Command {
         return $result;
     }
 
-    protected function onSuccess(InputInterface $input, OutputInterface $output, $cmdOutput) {
+    protected function onSuccess(InputInterface $input, OutputInterface $output, $cmdOutput)
+    {
         if (is_array($cmdOutput)) {
-            $this->buildTable($cmdOutput)->render($output);
+            $cmdOutput = array_slice($cmdOutput, 0, 5);
+            $headers   = $this->tableHeaders;
+            if (is_array($cmdOutput) && count($cmdOutput)) {
+                $headers = array();
+                foreach (array_keys($cmdOutput[0]) as $key) {
+                    $headers[] = ucfirst(str_replace('_', ' ', $key));
+                }
+            }
+            $this->createTable($headers, $cmdOutput, 10)->render();
         } else {
             $this->info($cmdOutput);
         }
         return 0;
     }
 
-    protected function onFailure(InputInterface $input, OutputInterface $output, $cmdOutput) {
+    protected function onFailure(InputInterface $input, OutputInterface $output, $cmdOutput)
+    {
         $this->printLastError();
         return 1;
     }
@@ -175,7 +195,8 @@ class Command extends \Symfony\Component\Console\Command\Command {
      * @param array $values Rows to insert into table
      * @return \Symfony\Component\Console\Helper\TableHelper
      */
-    protected function buildTable(array $values) {
+    protected function buildTable(array $values)
+    {
         $rows = array();
         $i    = 0;
         foreach ($values as $key => $value) {
@@ -187,8 +208,8 @@ class Command extends \Symfony\Component\Console\Command\Command {
 //            } else
             if (is_array($value)) {
                 $value = implode("\n", array_map(function ($v, $k) {
-                            return $k . ': ' . $v;
-                        }, $value, array_keys($value)));
+                        return $k . ': ' . $v;
+                    }, $value, array_keys($value)));
             } elseif (is_object($value)) {
                 if (method_exists($value, "__toString")) {
                     $value = (string) $value;
@@ -203,10 +224,39 @@ class Command extends \Symfony\Component\Console\Command\Command {
                 $rows[] = new \Symfony\Component\Console\Helper\TableSeparator();
             }
         }
-        return $this->getHelper('table')->
-                        setLayout(\Symfony\Component\Console\Helper\TableHelper::LAYOUT_BORDERLESS)->
-                        setHeaders($this->tableHeaders)->
-                        setRows($rows);
+        $table = new \Symfony\Component\Console\Helper\Table($this->getOutput());
+        return $table->
+                setStyle('borderless')->
+                setHeaders($this->tableHeaders)->
+                setRows($rows);
     }
 
+    /**
+     *
+     * @param array $values Rows to insert into table
+     * @return \Symfony\Component\Console\Helper\TableHelper
+     */
+    protected function createTable($headers = array(), $rows = array(), $repeatHeaders = 0)
+    {
+        if ($repeatHeaders > 0 && count($rows) > $repeatHeaders) {
+            $rowsChunked = array_chunk($rows, $repeatHeaders);
+            $header      = array(
+                new \Symfony\Component\Console\Helper\TableSeparator(),
+                $headers,
+                new \Symfony\Component\Console\Helper\TableSeparator(),
+            );
+            $rows        = $rowsChunked[0];
+            foreach ($rowsChunked as $i => $chunk) {
+                echo $i . PHP_EOL;
+                if ($i != 0) {
+                    $rows = array_merge($rows, $header, $chunk);
+                }
+            }
+        }
+        $table = new \Symfony\Component\Console\Helper\Table($this->getOutput());
+        return $table->
+                setStyle('borderless')->
+                setHeaders($headers)->
+                setRows($rows);
+    }
 }

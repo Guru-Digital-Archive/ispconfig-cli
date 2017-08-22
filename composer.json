@@ -4,7 +4,7 @@
     "authors": [
         {
             "name": "Corey Sewell",
-            "email": "corey@gdmedia.tv"
+            "email": "corey@gurudigital.nz"
         }
     ],
     "config": {
@@ -19,9 +19,9 @@
         }
     },
     "require": {
-        "symfony/console": "~2.6",
-        "symfony/finder": "~2.6",
-        "symfony/yaml": "~2.6",
+        "symfony/console": "^3.3",
+        "symfony/finder": "^3.3",
+        "symfony/yaml": "^3.3",
         "gdm/ispconfig-soap-client": ">=0.0.1",
         "gdm/framework-types": ">=0.0.1"
     }

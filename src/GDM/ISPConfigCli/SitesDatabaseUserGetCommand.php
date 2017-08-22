@@ -45,11 +45,13 @@ class SitesDatabaseUserGetCommand extends Command {
                     $rows[] = new \Symfony\Component\Console\Helper\TableSeparator();
                 }
             }
-            $this->getHelper('table')->
-                    setLayout(\Symfony\Component\Console\Helper\TableHelper::LAYOUT_BORDERLESS)->
+    
+            $table = new \Symfony\Component\Console\Helper\Table($this->getOutput());
+            $table->
+                    setStyle('borderless')->
                     setHeaders($this->tableHeaders)->
                     setRows($rows)->
-                    render($output);
+                    render();
         } else {
             $this->error("Not found");
             $res = 1;
