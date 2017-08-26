@@ -169,15 +169,24 @@ class Command extends \Symfony\Component\Console\Command\Command
     protected function onSuccess(InputInterface $input, OutputInterface $output, $cmdOutput)
     {
         if (is_array($cmdOutput)) {
-            $cmdOutput = array_slice($cmdOutput, 0, 5);
-            $headers   = $this->tableHeaders;
-            if (is_array($cmdOutput) && count($cmdOutput)) {
-                $headers = array();
-                foreach (array_keys($cmdOutput[0]) as $key) {
-                    $headers[] = ucfirst(str_replace('_', ' ', $key));
+            $rows    = $cmdOutput;
+            $headers = $this->tableHeaders;
+            if (is_array($rows) && count($rows)) {
+                if (is_array($rows[0])) {
+                    $headers = array();
+                    foreach (array_keys($rows[0]) as $key) {
+                        $headers[] = ucfirst(str_replace('_', ' ', $key));
+                    }
+                } else {
+                    $arguments = $input->getArguments();
+
+                    $headers = array($arguments["command"]);
+                    $rows    = array_map(function($row) {
+                        return array($row);
+                    }, $rows);
                 }
             }
-            $this->createTable($headers, $cmdOutput, 10)->render();
+            $this->createTable($headers, $rows, 10)->render();
         } else {
             $this->info($cmdOutput);
         }
@@ -238,7 +247,8 @@ class Command extends \Symfony\Component\Console\Command\Command
      */
     protected function createTable($headers = array(), $rows = array(), $repeatHeaders = 0)
     {
-        if ($repeatHeaders > 0 && count($rows) > $repeatHeaders) {
+        $table = new \Symfony\Component\Console\Helper\Table($this->getOutput());
+        if ($headers && $repeatHeaders > 0 && count($rows) > $repeatHeaders) {
             $rowsChunked = array_chunk($rows, $repeatHeaders);
             $header      = array(
                 new \Symfony\Component\Console\Helper\TableSeparator(),
@@ -252,11 +262,10 @@ class Command extends \Symfony\Component\Console\Command\Command
                     $rows = array_merge($rows, $header, $chunk);
                 }
             }
+            $table->setHeaders($headers);
         }
-        $table = new \Symfony\Component\Console\Helper\Table($this->getOutput());
         return $table->
                 setStyle('borderless')->
-                setHeaders($headers)->
                 setRows($rows);
     }
 }

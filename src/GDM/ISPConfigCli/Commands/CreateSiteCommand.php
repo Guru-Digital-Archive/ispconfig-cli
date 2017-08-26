@@ -1,12 +1,11 @@
 <?php
-
 namespace GDM\ISPConfigCli\Commands;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
-
+class CreateSiteCommand extends \GDM\ISPConfigCli\Command
+{
     /**
      *
      * @var CreateSiteCommandConifg
@@ -16,21 +15,23 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
 
     const COMMAND_NAME = 'createSite';
 
-    protected function configure() {
+    protected function configure()
+    {
         $this->
-                setName(static::COMMAND_NAME)->
-                setDescription('Create a site domain, databse and database user in one command')->
-                addArgument("server", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Name of the server to provis this site on')->
-                addArgument("client", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Name or Id of the client who owns this site')->
-                addArgument("domain", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Domain name to setup')->
-                addArgument("dbname", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Database name to setup')->
-                addArgument("dbuser", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Database user to setup or if exists to assign to database')->
-                addArgument("dbpass", \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Database password to assign to user (Only required if DB User does not exist)')->
-                addOption("genpass", 'g', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'If set, a random db password will be generated'
+            setName(static::COMMAND_NAME)->
+            setDescription('Create a site domain, databse and database user in one command')->
+            addArgument("server", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Name of the server to provis this site on')->
+            addArgument("client", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Name or Id of the client who owns this site')->
+            addArgument("domain", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Domain name to setup')->
+            addArgument("dbname", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Database name to setup')->
+            addArgument("dbuser", \Symfony\Component\Console\Input\InputArgument::REQUIRED, 'Database user to setup or if exists to assign to database')->
+            addArgument("dbpass", \Symfony\Component\Console\Input\InputArgument::OPTIONAL, 'Database password to assign to user (Only required if DB User does not exist)')->
+            addOption("genpass", 'g', \Symfony\Component\Console\Input\InputOption::VALUE_NONE, 'If set, a random db password will be generated'
         );
     }
 
-    protected function getConfig() {
+    protected function getConfig()
+    {
         if (!$this->config) {
             $iniConf      = \GDM\Helpers\ISPConfig::getInstance()->getConfig();
             $this->config = new CreateSiteCommandConifg();
@@ -59,14 +60,16 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
         return $this->config;
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
         $config = $this->getConfig();
         $this->createSite($config);
         $this->createDBUser($config);
         $this->createDb($config);
     }
 
-    protected function getServerId() {
+    protected function getServerId()
+    {
         $serverId = $this->config->server;
         $this->info("Checking server " . $serverId . " ", false);
         if (!is_numeric($serverId)) {
@@ -83,7 +86,7 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
                     throw new \InvalidArgumentException("Unable to find the server " . $this->config->server . $this->getConfig()->suffix . " (" . $this->config->server . ")");
                 }
             }
-            $this->info("... found " . $serverId, false);
+            $this->info("... found " . $serverId . " ", false);
         } else {
             $serverArr = $this->soapClient()->serverGet($serverId);
             if (isset($serverArr['server']['hostname'])) {
@@ -97,7 +100,8 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
         return $serverId;
     }
 
-    protected function getClientId() {
+    protected function getClientId()
+    {
         $clientId = $this->config->client;
         $this->info("Checking client " . $clientId . " ", false);
         if (!is_numeric($clientId)) {
@@ -124,7 +128,8 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
         return $clientId;
     }
 
-    protected function getDatabaseId() {
+    protected function getDatabaseId()
+    {
         $dbId = null;
         if (!$this->config->dbpass) {
             $this->info("Checking databse user " . $this->config->dbuser . " ... finding id ", false);
@@ -141,7 +146,8 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
         return $dbId;
     }
 
-    protected function buildSitesWebDomainAddArgs($serverConf) {
+    protected function buildSitesWebDomainAddArgs($serverConf)
+    {
         $sitesWebDomainAddArgs = array();
         if ($serverConf && isset($serverConf['sitesWebDomainAdd'])) {
             $sitesWebDomainAddConfig = $serverConf['sitesWebDomainAdd'];
@@ -157,14 +163,15 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
                 } else if (isset($sitesWebDomainAddConfig[$parmName])) {
                     $sitesWebDomainAddArgs[] = $sitesWebDomainAddConfig[$parmName];
                 } else {
-                    $sitesWebDomainAddArgs[] = "";
+                    $sitesWebDomainAddArgs[] = $parameter->isOptional() ? $parameter->getDefaultValue() : '';
                 }
             }
         }
         return $sitesWebDomainAddArgs;
     }
 
-    protected function testParameters(CreateSiteCommandConifg $config) {
+    protected function testParameters(CreateSiteCommandConifg $config)
+    {
         $this->info("Checking domain " . $config->domain . " ", false);
         $domainResult = $this->soapClient()->sitesWebDomainGet(array("domain" => $config->domain));
         if ($domainResult != false) {
@@ -186,7 +193,7 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
             throw new \InvalidArgumentException("The database user name must be 16 characters or less");
         }
         $this->success("OK");
-        
+
         if ($this->config->dbpass) {
             $this->info("Checking database password ", false);
             $errors = array();
@@ -215,7 +222,8 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
         }
     }
 
-    protected function createSite(CreateSiteCommandConifg $config) {
+    protected function createSite(CreateSiteCommandConifg $config)
+    {
         $this->info("Creating domain " . $this->getInput()->getArgument('domain') . " ", false);
         $sitesWebDomainAddArgs = $this->buildSitesWebDomainAddArgs(isset($config->servers[$config->serverId]) ? $config->servers[$config->serverId] : null);
         $config->siteId        = call_user_func_array(array($this->soapClient(), "sitesWebDomainAdd"), $sitesWebDomainAddArgs);
@@ -223,21 +231,11 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
             $this->error("Failed");
             throw $this->soapClient()->getLastException();
         }
-        if (isset($config->servers[$config->serverId]['sitesWebDomainAdd']['appendwebroot'])) {
-            $domainResult = $this->soapClient()->sitesWebDomainGet($config->siteId);
-            if ($domainResult) {
-                $domainResult["apache_directives"] = 'DocumentRoot "' . $domainResult["document_root"] . '/' . $config->servers[$config->serverId]['sitesWebDomainAdd']['appendwebroot'] . '"';
-                $res                               = $this->soapClient()->sitesWebDomainUpdate($config->clientId, $domainResult["domain_id"], $domainResult);
-                if ($res === false) {
-                    $this->error("Failed");
-                    throw $this->soapClient()->getLastException();
-                }
-            }
-        }
         $this->success("Completed " . $config->siteId);
     }
 
-    protected function createDBUser(CreateSiteCommandConifg $config) {
+    protected function createDBUser(CreateSiteCommandConifg $config)
+    {
         if (!$config->dbUserId) {
             $this->info("Creating database user " . $config->dbuser . " ", false);
             $config->dbUserId = $this->soapClient()->sitesDatabaseUserAdd($config->clientId, $config->serverId, $config->dbuser, $config->dbpass);
@@ -249,7 +247,8 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
         }
     }
 
-    protected function createDb(CreateSiteCommandConifg $config) {
+    protected function createDb(CreateSiteCommandConifg $config)
+    {
         $this->info("Creating database " . $config->dbname . " ", false);
         $config->dbId = $this->soapClient()->sitesDatabaseAdd($config->clientId, $config->serverId, $config->siteId, $config->dbname, $config->dbUserId);
         if ($config->dbId == false) {
@@ -267,7 +266,8 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
      * @param type $s
      * @return boolean
      */
-    function generatePassword($l = 8, $c = 2, $n = 2, $s = 2) {
+    function generatePassword($l = 8, $c = 2, $n = 2, $s = 2)
+    {
         // get count of all required minimum special chars
         $count = $c + $n + $s;
         $out   = "";
@@ -334,5 +334,4 @@ class CreateSiteCommand extends \GDM\ISPConfigCli\Command {
         }
         return $out;
     }
-
 }
