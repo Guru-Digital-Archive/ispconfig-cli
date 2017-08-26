@@ -5,7 +5,8 @@ namespace GDM\ISPConfigCli;
 use \Symfony\Component\Console\Input\InputInterface;
 use \Symfony\Component\Console\Output\OutputInterface;
 
-class UserNameExitsCommand extends Command {
+class UserNameExitsCommand extends Command
+{
 
     /**
      *
@@ -14,13 +15,14 @@ class UserNameExitsCommand extends Command {
      * @param \GDM\ISPConfig\UsernameStatus[] $cmdOutput
      * @return int
      */
-    protected function onSuccess(InputInterface $input, OutputInterface $output, $cmdOutput) {
-        $this->tableHeaders = array('Username', 'Exists', 'Error');
-        $rows               = array();
+    protected function onSuccess(InputInterface $input, OutputInterface $output, $cmdOutput)
+    {
+        $this->tableHeaders = ['Username', 'Exists', 'Error'];
+        $rows               = [];
         $i                  = 0;
         foreach ($cmdOutput as $status) {
             $i++;
-            $rows[] = array($status->username, $status->exists ? "true" : "false", $status->error);
+            $rows[] = [$status->username, $status->exists ? 'true' : 'false', $status->error];
             if ($this->repeatHeaders > 0 && $i % $this->repeatHeaders == 0) {
                 $rows[] = new \Symfony\Component\Console\Helper\TableSeparator();
                 $rows[] = $this->tableHeaders;

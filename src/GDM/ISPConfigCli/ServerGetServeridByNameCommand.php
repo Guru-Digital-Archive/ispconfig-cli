@@ -5,7 +5,8 @@ namespace GDM\ISPConfigCli;
 use \Symfony\Component\Console\Input\InputInterface;
 use \Symfony\Component\Console\Output\OutputInterface;
 
-class ServerGetServeridByNameCommand extends Command {
+class ServerGetServeridByNameCommand extends Command
+{
 
     /**
      *
@@ -14,7 +15,8 @@ class ServerGetServeridByNameCommand extends Command {
      * @param \GDM\ISPConfig\UsernameStatus[] $cmdOutput
      * @return int
      */
-    protected function onSuccess(InputInterface $input, OutputInterface $output, $cmdOutput) {
+    protected function onSuccess(InputInterface $input, OutputInterface $output, $cmdOutput)
+    {
         $res = 0;
         if (count($cmdOutput)) {
             foreach ($cmdOutput as $server) {
@@ -23,7 +25,7 @@ class ServerGetServeridByNameCommand extends Command {
                 }
             }
         } else {
-            $this->error("Not found");
+            $this->error('Not found');
             $res = 1;
         }
         return $res;

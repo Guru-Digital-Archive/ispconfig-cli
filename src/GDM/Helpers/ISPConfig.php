@@ -6,13 +6,14 @@ use \Exception;
 use \GDM\ISPConfig\SoapClient;
 use \Symfony\Component\Yaml\Parser;
 
-class ISPConfig {
+class ISPConfig
+{
 
     /**
      * Default config filename
      * @var string
      */
-    protected static $configFile = "ispconfig-cli.yml";
+    protected static $configFile = 'ispconfig-cli.yml';
 
     /**
      * Contains keys to parameters that must be contained in the config file
@@ -24,7 +25,7 @@ class ISPConfig {
      * Holds the setting loaded from the config file
      * @var array
      */
-    private $settings = array();
+    private $settings = [];
 
     /**
      * Singleton instance of the ISPConfig helper
@@ -38,15 +39,16 @@ class ISPConfig {
      */
     private $soapClient = null;
 
-    protected function __construct() {
-
+    protected function __construct()
+    {
     }
 
     /**
      *
      * @return SoapClient
      */
-    public function getSoapClient() {
+    public function getSoapClient()
+    {
         if (!$this->soapClient) {
             $config           = $this->getConfig();
             $this->soapClient = new SoapClient($config['url'], $config['user'], $config['password']);
@@ -58,20 +60,22 @@ class ISPConfig {
      *
      * @return ISPConfig
      */
-    public static function getInstance() {
+    public static function getInstance()
+    {
         if (!isset(static::$instance)) {
             static::$instance = new static;
         }
         return static::$instance;
     }
 
-    protected function getConfigFile() {
+    protected function getConfigFile()
+    {
         $etcConf    = DIRECTORY_SEPARATOR . 'etc' . DIRECTORY_SEPARATOR . self::$configFile;
-        $dir        = ( class_exists('\Phar') && \Phar::running(false) ) ? dirname(\Phar::running(false)) : dirname(__FILE__);
+        $dir        = (class_exists('\Phar') && \Phar::running(false)) ? dirname(\Phar::running(false)) : dirname(__FILE__);
         $configFile = $dir . DIRECTORY_SEPARATOR . self::$configFile;
 
-        $checked    = array();
-        $checked[] = $etcConf;
+        $checked    = [];
+        $checked[]  = $etcConf;
         if (file_exists($etcConf)) {
             $configFile = $etcConf;
         } else {
@@ -80,7 +84,7 @@ class ISPConfig {
             while (!file_exists($configFile)) {
                 $checked[] = $configFile;
                 if ($i >= $max) {
-                    throw new Exception("Unable to find config file: ".PHP_EOL . implode(PHP_EOL, $checked));
+                    throw new Exception('Unable to find config file: '.PHP_EOL . implode(PHP_EOL, $checked));
                 }
                 $dir        = dirname($dir);
                 $configFile = $dir . DIRECTORY_SEPARATOR . self::$configFile;
@@ -91,7 +95,8 @@ class ISPConfig {
         return $configFile;
     }
 
-    public function getConfig() {
+    public function getConfig()
+    {
         if (!$this->settings) {
             $yaml           = new Parser();
             $this->settings = $yaml->parse(file_get_contents($this->getConfigFile()));
@@ -104,14 +109,15 @@ class ISPConfig {
      *
      * @return \GDM\ISPConfigCli\Command[]
      */
-    public function getCommands() {
+    public function getCommands()
+    {
         $classTemplate = '\GDM\ISPConfigCli\{CommandName}Command';
-        $commands      = array();
+        $commands      = [];
         $reflection    = new \ReflectionClass('\GDM\ISPConfig\SoapClient');
         foreach ($reflection->getMethods() as $method) {
             /* @var $method ReflectionMethod */
             $remoteMethodName = $method->getName();
-            if ($remoteMethodName !== "__construct") {
+            if ($remoteMethodName !== '__construct') {
                 $toTest  = str_replace('{CommandName}', ucfirst($remoteMethodName), $classTemplate);
                 $class   = class_exists($toTest) ? $toTest : '\GDM\ISPConfigCli\Command';
                 $command = new $class($remoteMethodName);
@@ -127,14 +133,13 @@ class ISPConfig {
         return $commands;
     }
 
-    protected
-            function checkConfig() {
+    protected function checkConfig()
+    {
         foreach (self::$requiredSettings as $requiredSettings) {
             if (!isset($this->settings[$requiredSettings])) {
-                throw new Exception("The required settings " . $requiredSettings . " was not found in the config file " . $this->getConfigFile());
+                throw new Exception('The required settings ' . $requiredSettings . ' was not found in the config file ' . $this->getConfigFile());
             }
         }
         return true;
     }
-
 }

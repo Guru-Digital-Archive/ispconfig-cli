@@ -5,7 +5,8 @@ namespace GDM\ISPConfigCli;
 use \Symfony\Component\Console\Input\InputInterface;
 use \Symfony\Component\Console\Output\OutputInterface;
 
-class SitesDatabaseUserGetCommand extends Command {
+class SitesDatabaseUserGetCommand extends Command
+{
 
     /**
      *
@@ -14,29 +15,30 @@ class SitesDatabaseUserGetCommand extends Command {
      * @param \GDM\ISPConfig\UsernameStatus[] $cmdOutput
      * @return int
      */
-    protected function onSuccess(InputInterface $input, OutputInterface $output, $cmdOutput) {
+    protected function onSuccess(InputInterface $input, OutputInterface $output, $cmdOutput)
+    {
         $res = 0;
 
         if (count($cmdOutput)) {
-            $columns            = array(
-                "database_user_id"     => 'DB user Id',
-                "sys_userid"           => 'Sys user id',
-                "sys_groupid"          => 'Sys group id',
-                "sys_perm_user"        => 'Sys perm user',
-                "sys_perm_group"       => 'Sys perm group',
-                "sys_perm_other"       => 'Sys perm other',
-                "server_id"            => 'Server Id',
-                "database_user"        => 'User',
-                "database_user_prefix" => 'User prefix'
-            );
+            $columns            = [
+                'database_user_id'     => 'DB user Id',
+                'sys_userid'           => 'Sys user id',
+                'sys_groupid'          => 'Sys group id',
+                'sys_perm_user'        => 'Sys perm user',
+                'sys_perm_group'       => 'Sys perm group',
+                'sys_perm_other'       => 'Sys perm other',
+                'server_id'            => 'Server Id',
+                'database_user'        => 'User',
+                'database_user_prefix' => 'User prefix'
+            ];
             $this->tableHeaders = array_values($columns);
-            $rows               = array();
+            $rows               = [];
             $i                  = 0;
             foreach ($cmdOutput as $server) {
                 $i++;
-                $row = array();
+                $row = [];
                 foreach (array_keys($columns) as $column) {
-                    $row[] = isset($server[$column]) ? $server[$column] : "";
+                    $row[] = isset($server[$column]) ? $server[$column] : '';
                 }
                 $rows[] = $row;
                 if ($this->repeatHeaders > 0 && $i % $this->repeatHeaders == 0) {
@@ -53,7 +55,7 @@ class SitesDatabaseUserGetCommand extends Command {
                     setRows($rows)->
                     render();
         } else {
-            $this->error("Not found");
+            $this->error('Not found');
             $res = 1;
         }
         return $res;

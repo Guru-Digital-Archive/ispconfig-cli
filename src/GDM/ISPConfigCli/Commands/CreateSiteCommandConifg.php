@@ -2,10 +2,10 @@
 
 namespace GDM\ISPConfigCli\Commands;
 
-class CreateSiteCommandConifg {
-
-    public $suffix  = "";
-    public $servers = array();
+class CreateSiteCommandConifg
+{
+    public $suffix  = '';
+    public $servers = [];
     public $serverId;
     public $clientId;
     public $dbuser;
@@ -17,5 +17,4 @@ class CreateSiteCommandConifg {
     public $server;
     public $client;
     public $domain;
-
 }
