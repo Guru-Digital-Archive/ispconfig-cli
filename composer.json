@@ -19,9 +19,9 @@
         }
     },
     "require": {
-        "symfony/console": "^3.3",
-        "symfony/finder": "^3.3",
-        "symfony/yaml": "^3.3",
+        "symfony/console": "^4.1",
+        "symfony/finder": "^4.1",
+        "symfony/yaml": "^4.1",
         "gdm/ispconfig-soap-client": "^0.0.3",
         "gdm/framework-types": ">=0.0.1"
     }

@@ -7,6 +7,7 @@ use \GDM\Helpers\ISPConfig;
 
 class Command extends \Symfony\Component\Console\Command\Command
 {
+
     /**
      * @var InputInterface
      */
@@ -169,24 +170,44 @@ class Command extends \Symfony\Component\Console\Command\Command
     protected function onSuccess(InputInterface $input, OutputInterface $output, $cmdOutput)
     {
         if (is_array($cmdOutput)) {
-            $rows    = $cmdOutput;
-            $headers = $this->tableHeaders;
+            $repeatHeaders = 10;
+            $rows          = $cmdOutput;
+            $headers       = $this->tableHeaders;
+            $columns       = array_map('trim', explode(",", $input->getOption('columns')));
             if (is_array($rows) && count($rows)) {
                 if (is_array($rows[0])) {
                     $headers = [];
                     foreach (array_keys($rows[0]) as $key) {
-                        $headers[] = ucfirst(str_replace('_', ' ', $key));
+                        if (!$columns || in_array($key, $columns)) {
+                            $headers[] = ucfirst(str_replace('_', ' ', $key));
+                        }
                     }
                 } else {
                     $arguments = $input->getArguments();
 
                     $headers = [$arguments['command']];
-                    $rows    = array_map(function ($row) {
-                        return [$row];
+                    $rows    = array_map(function ($row) use($arguments) {
+                        return [$arguments['command'] => $row];
                     }, $rows);
                 }
             }
-            $this->createTable($headers, $rows, 10)->render();
+            $headersOption = $input->getOption('table-headers');
+            if ((!is_null($headersOption)) &&
+                (!empty($headersOption)) &&
+                (in_array(strtolower($headersOption), ["off", "false", "no", "0", "zero"]))) {
+                $repeatHeaders = 0;
+                $headers       = null;
+            }
+            if ($columns) {
+                foreach ($rows as $i=> $row) {
+                    foreach (array_keys($row) as $column) {
+                        if (!in_array($column, $columns)) {
+                            unset($rows[$i][$column]);
+                        }
+                    }
+                }
+            }
+            $this->createTable($headers, $rows, 10, array_map('trim', explode(",", $input->getOption('columns'))))->render();
         } else {
             $this->info($cmdOutput);
         }
@@ -217,8 +238,8 @@ class Command extends \Symfony\Component\Console\Command\Command
 //            } else
             if (is_array($value)) {
                 $value = implode("\n", array_map(function ($v, $k) {
-                    return $k . ': ' . $v;
-                }, $value, array_keys($value)));
+                        return $k . ': ' . $v;
+                    }, $value, array_keys($value)));
             } elseif (is_object($value)) {
                 if (method_exists($value, '__toString')) {
                     $value = (string) $value;
@@ -257,7 +278,6 @@ class Command extends \Symfony\Component\Console\Command\Command
             ];
             $rows        = $rowsChunked[0];
             foreach ($rowsChunked as $i => $chunk) {
-                echo $i . PHP_EOL;
                 if ($i != 0) {
                     $rows = array_merge($rows, $header, $chunk);
                 }

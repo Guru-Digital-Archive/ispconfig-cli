@@ -4,6 +4,7 @@
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputOption;
 
 define('DS', DIRECTORY_SEPARATOR);
 
@@ -19,7 +20,10 @@ $console = new Application();
 $console->setName('ISPConfig CLI');
 $console->setVersion('0.0.1');
 $console->addCommands(\GDM\Helpers\ISPConfig::getInstance()->getCommands());
-
+$console->getDefinition()->addOptions([
+   new InputOption('table-headers', 't', InputOption::VALUE_OPTIONAL, 'Show table haders.', 'true'),
+   new InputOption('columns', 'c', InputOption::VALUE_OPTIONAL, 'Columns to return.', null),
+]);
 $consoleCommandsDirectory = dirname(__DIR__) . DS . 'src' . DS . 'GDM' . DS . 'ISPConfigCli' . DS . 'Commands' . DS;
 
 clearstatcache(true, $consoleCommandsDirectory);
